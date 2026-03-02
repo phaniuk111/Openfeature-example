@@ -17,7 +17,7 @@
                   {
                     "var": "environment"
                   },
-                  "prod"
+                  "dev"
                 ]
               },
               {
@@ -25,7 +25,7 @@
                   {
                     "var": "environment"
                   },
-                  "production"
+                  "staging"
                 ]
               }
             ]
@@ -45,11 +45,31 @@
       "targeting": {
         "if": [
           {
-            "==": [
+            "or": [
               {
-                "var": "environment"
+                "==": [
+                  {
+                    "var": "environment"
+                  },
+                  "staging"
+                ]
               },
-              "staging"
+              {
+                "==": [
+                  {
+                    "var": "environment"
+                  },
+                  "prod"
+                ]
+              },
+              {
+                "==": [
+                  {
+                    "var": "environment"
+                  },
+                  "production"
+                ]
+              }
             ]
           },
           "large",
@@ -60,21 +80,43 @@
     "welcome-banner": {
       "state": "ENABLED",
       "variants": {
-        "dev": "Service A - targeting dev",
-        "prod": "Service A - targeting prod"
+        "dev": "Service A - dev",
+        "staging": "Service A - staging",
+        "prod": "Service A - production"
       },
       "defaultVariant": "dev",
       "targeting": {
         "if": [
           {
+            "or": [
+              {
+                "==": [
+                  {
+                    "var": "environment"
+                  },
+                  "prod"
+                ]
+              },
+              {
+                "==": [
+                  {
+                    "var": "environment"
+                  },
+                  "production"
+                ]
+              }
+            ]
+          },
+          "prod",
+          {
             "==": [
               {
                 "var": "environment"
               },
-              "prod"
+              "staging"
             ]
           },
-          "prod",
+          "staging",
           "dev"
         ]
       }
@@ -89,11 +131,31 @@
       "targeting": {
         "if": [
           {
-            "==": [
+            "or": [
               {
-                "var": "environment"
+                "==": [
+                  {
+                    "var": "environment"
+                  },
+                  "staging"
+                ]
               },
-              "staging"
+              {
+                "==": [
+                  {
+                    "var": "environment"
+                  },
+                  "prod"
+                ]
+              },
+              {
+                "==": [
+                  {
+                    "var": "environment"
+                  },
+                  "production"
+                ]
+              }
             ]
           },
           "on",

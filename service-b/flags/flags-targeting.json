@@ -7,21 +7,7 @@
         "on": true,
         "off": false
       },
-      "defaultVariant": "off",
-      "targeting": {
-        "if": [
-          {
-            "==": [
-              {
-                "var": "environment"
-              },
-              "dev"
-            ]
-          },
-          "on",
-          "off"
-        ]
-      }
+      "defaultVariant": "off"
     },
     "dataflow-batch-size": {
       "state": "ENABLED",
@@ -33,11 +19,31 @@
       "targeting": {
         "if": [
           {
-            "==": [
+            "or": [
               {
-                "var": "environment"
+                "==": [
+                  {
+                    "var": "environment"
+                  },
+                  "staging"
+                ]
               },
-              "prod"
+              {
+                "==": [
+                  {
+                    "var": "environment"
+                  },
+                  "prod"
+                ]
+              },
+              {
+                "==": [
+                  {
+                    "var": "environment"
+                  },
+                  "production"
+                ]
+              }
             ]
           },
           "large",
@@ -48,21 +54,43 @@
     "welcome-banner": {
       "state": "ENABLED",
       "variants": {
-        "dev": "Service B - targeting dev",
-        "prod": "Service B - targeting prod"
+        "dev": "Service B - dev",
+        "staging": "Service B - staging",
+        "prod": "Service B - production"
       },
       "defaultVariant": "dev",
       "targeting": {
         "if": [
           {
+            "or": [
+              {
+                "==": [
+                  {
+                    "var": "environment"
+                  },
+                  "prod"
+                ]
+              },
+              {
+                "==": [
+                  {
+                    "var": "environment"
+                  },
+                  "production"
+                ]
+              }
+            ]
+          },
+          "prod",
+          {
             "==": [
               {
                 "var": "environment"
               },
-              "prod"
+              "staging"
             ]
           },
-          "prod",
+          "staging",
           "dev"
         ]
       }
