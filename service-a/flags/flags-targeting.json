@@ -15,7 +15,7 @@
               {
                 "==": [
                   {
-                    "var": "environment"
+                    "var": "namespace"
                   },
                   "dev"
                 ]
@@ -23,11 +23,36 @@
               {
                 "==": [
                   {
+                    "var": "namespace"
+                  },
+                  "dev1"
+                ]
+              },
+              {
+                "==": [
+                  {
+                    "var": "namespace"
+                  },
+                  "dev2"
+                ]
+              },
+              {
+                "==": [
+                  {
                     "var": "environment"
                   },
-                  "staging"
+                  "dev"
                 ]
               }
+            ]
+          },
+          "on",
+          {
+            "==": [
+              {
+                "var": "environment"
+              },
+              "staging"
             ]
           },
           "on",
@@ -44,6 +69,35 @@
       "defaultVariant": "small",
       "targeting": {
         "if": [
+          {
+            "or": [
+              {
+                "==": [
+                  {
+                    "var": "namespace"
+                  },
+                  "dev"
+                ]
+              },
+              {
+                "==": [
+                  {
+                    "var": "namespace"
+                  },
+                  "dev1"
+                ]
+              },
+              {
+                "==": [
+                  {
+                    "var": "namespace"
+                  },
+                  "dev2"
+                ]
+              }
+            ]
+          },
+          "small",
           {
             "or": [
               {
@@ -92,6 +146,44 @@
               {
                 "==": [
                   {
+                    "var": "namespace"
+                  },
+                  "dev"
+                ]
+              },
+              {
+                "==": [
+                  {
+                    "var": "namespace"
+                  },
+                  "dev1"
+                ]
+              },
+              {
+                "==": [
+                  {
+                    "var": "namespace"
+                  },
+                  "dev2"
+                ]
+              }
+            ]
+          },
+          "dev",
+          {
+            "==": [
+              {
+                "var": "environment"
+              },
+              "staging"
+            ]
+          },
+          "staging",
+          {
+            "or": [
+              {
+                "==": [
+                  {
                     "var": "environment"
                   },
                   "prod"
@@ -108,15 +200,6 @@
             ]
           },
           "prod",
-          {
-            "==": [
-              {
-                "var": "environment"
-              },
-              "staging"
-            ]
-          },
-          "staging",
           "dev"
         ]
       }
@@ -130,6 +213,35 @@
       "defaultVariant": "off",
       "targeting": {
         "if": [
+          {
+            "or": [
+              {
+                "==": [
+                  {
+                    "var": "namespace"
+                  },
+                  "dev"
+                ]
+              },
+              {
+                "==": [
+                  {
+                    "var": "namespace"
+                  },
+                  "dev1"
+                ]
+              },
+              {
+                "==": [
+                  {
+                    "var": "namespace"
+                  },
+                  "dev2"
+                ]
+              }
+            ]
+          },
+          "off",
           {
             "or": [
               {

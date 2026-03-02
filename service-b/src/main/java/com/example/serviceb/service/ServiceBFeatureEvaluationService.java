@@ -18,27 +18,41 @@ public class ServiceBFeatureEvaluationService {
 
     private final Client client;
     private final String defaultEnvironment;
+    private final String defaultNamespace;
 
     public ServiceBFeatureEvaluationService(
             Client client,
             @org.springframework.beans.factory.annotation.Value("${app.env:dev}")
-                    String defaultEnvironment) {
+                    String defaultEnvironment,
+            @org.springframework.beans.factory.annotation.Value("${app.namespace:dev}")
+                    String defaultNamespace) {
         this.client = client;
         this.defaultEnvironment = defaultEnvironment;
+        this.defaultNamespace = defaultNamespace;
     }
 
-    public ServiceBFeatureResult evaluate(String requestedEnvironment, String userId) {
+    public ServiceBFeatureResult evaluate(
+            String requestedEnvironment, String requestedNamespace, String userId) {
         String effectiveEnvironment = hasText(requestedEnvironment) ? requestedEnvironment : defaultEnvironment;
-        EvaluationContext context = buildContext(effectiveEnvironment, userId);
+        String effectiveNamespace = hasText(requestedNamespace) ? requestedNamespace : defaultNamespace;
+        EvaluationContext context = buildContext(effectiveEnvironment, effectiveNamespace, userId);
         boolean userIdPresent = hasText(userId);
 
-        boolean newUiEnabled = safeBoolean("new-ui", false, context, effectiveEnvironment, userIdPresent);
+        boolean newUiEnabled =
+                safeBoolean(
+                        "new-ui",
+                        false,
+                        context,
+                        effectiveEnvironment,
+                        effectiveNamespace,
+                        userIdPresent);
         Integer batchSize =
                 safeInteger(
                         "dataflow-batch-size",
                         100,
                         context,
                         effectiveEnvironment,
+                        effectiveNamespace,
                         userIdPresent);
         String banner =
                 safeString(
@@ -46,6 +60,7 @@ public class ServiceBFeatureEvaluationService {
                         "fallback-banner",
                         context,
                         effectiveEnvironment,
+                        effectiveNamespace,
                         userIdPresent);
         boolean recommendationsEngine =
                 safeBoolean(
@@ -53,15 +68,22 @@ public class ServiceBFeatureEvaluationService {
                         false,
                         context,
                         effectiveEnvironment,
+                        effectiveNamespace,
                         userIdPresent);
 
         return new ServiceBFeatureResult(
-                effectiveEnvironment, newUiEnabled, batchSize, banner, recommendationsEngine);
+                effectiveEnvironment,
+                effectiveNamespace,
+                newUiEnabled,
+                batchSize,
+                banner,
+                recommendationsEngine);
     }
 
-    private EvaluationContext buildContext(String environment, String userId) {
+    private EvaluationContext buildContext(String environment, String namespace, String userId) {
         Map<String, Value> contextValues = new HashMap<>();
         contextValues.put("environment", new Value(environment));
+        contextValues.put("namespace", new Value(namespace));
 
         if (hasText(userId)) {
             contextValues.put("userId", new Value(userId));
@@ -79,14 +101,15 @@ public class ServiceBFeatureEvaluationService {
             boolean defaultValue,
             EvaluationContext context,
             String environment,
+            String namespace,
             boolean userIdPresent) {
         long startNanos = System.nanoTime();
         try {
             boolean result = client.getBooleanValue(flagKey, defaultValue, context);
-            logSuccess(flagKey, result, environment, userIdPresent, startNanos);
+            logSuccess(flagKey, result, environment, namespace, userIdPresent, startNanos);
             return result;
         } catch (RuntimeException ex) {
-            logError(flagKey, defaultValue, environment, userIdPresent, startNanos, ex);
+            logError(flagKey, defaultValue, environment, namespace, userIdPresent, startNanos, ex);
             return defaultValue;
         }
     }
@@ -96,14 +119,15 @@ public class ServiceBFeatureEvaluationService {
             Integer defaultValue,
             EvaluationContext context,
             String environment,
+            String namespace,
             boolean userIdPresent) {
         long startNanos = System.nanoTime();
         try {
             Integer result = client.getIntegerValue(flagKey, defaultValue, context);
-            logSuccess(flagKey, result, environment, userIdPresent, startNanos);
+            logSuccess(flagKey, result, environment, namespace, userIdPresent, startNanos);
             return result;
         } catch (RuntimeException ex) {
-            logError(flagKey, defaultValue, environment, userIdPresent, startNanos, ex);
+            logError(flagKey, defaultValue, environment, namespace, userIdPresent, startNanos, ex);
             return defaultValue;
         }
     }
@@ -113,14 +137,15 @@ public class ServiceBFeatureEvaluationService {
             String defaultValue,
             EvaluationContext context,
             String environment,
+            String namespace,
             boolean userIdPresent) {
         long startNanos = System.nanoTime();
         try {
             String result = client.getStringValue(flagKey, defaultValue, context);
-            logSuccess(flagKey, result, environment, userIdPresent, startNanos);
+            logSuccess(flagKey, result, environment, namespace, userIdPresent, startNanos);
             return result;
         } catch (RuntimeException ex) {
-            logError(flagKey, defaultValue, environment, userIdPresent, startNanos, ex);
+            logError(flagKey, defaultValue, environment, namespace, userIdPresent, startNanos, ex);
             return defaultValue;
         }
     }
@@ -129,14 +154,16 @@ public class ServiceBFeatureEvaluationService {
             String flagKey,
             Object result,
             String environment,
+            String namespace,
             boolean userIdPresent,
             long startNanos) {
         double durationMs = (System.nanoTime() - startNanos) / 1_000_000.0;
         logger.info(
-                "flag_eval_success flagKey={} result={} env={} userIdPresent={} durationMs={}",
+                "flag_eval_success flagKey={} result={} env={} namespace={} userIdPresent={} durationMs={}",
                 flagKey,
                 result,
                 environment,
+                namespace,
                 userIdPresent,
                 String.format("%.3f", durationMs));
     }
@@ -145,15 +172,17 @@ public class ServiceBFeatureEvaluationService {
             String flagKey,
             Object defaultValue,
             String environment,
+            String namespace,
             boolean userIdPresent,
             long startNanos,
             RuntimeException ex) {
         double durationMs = (System.nanoTime() - startNanos) / 1_000_000.0;
         logger.warn(
-                "flag_eval_error flagKey={} defaultUsed={} env={} userIdPresent={} durationMs={} error={}",
+                "flag_eval_error flagKey={} defaultUsed={} env={} namespace={} userIdPresent={} durationMs={} error={}",
                 flagKey,
                 defaultValue,
                 environment,
+                namespace,
                 userIdPresent,
                 String.format("%.3f", durationMs),
                 ex.toString());

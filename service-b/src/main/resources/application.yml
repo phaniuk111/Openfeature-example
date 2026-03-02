@@ -3,6 +3,7 @@ server:
 
 app:
   env: ${APP_ENV:dev}
+  namespace: ${APP_NAMESPACE:${APP_ENV:dev}}
   flags:
     mode: ${FLAG_MODE:per-env}
     base-path: ${FLAG_BASE_PATH:}

@@ -22,11 +22,14 @@ public class FeatureController {
     @GetMapping
     public Map<String, Object> getFlags(
             @RequestParam(required = false) String environment,
+            @RequestParam(required = false) String namespace,
             @RequestParam(required = false) String userId) {
-        ServiceBFeatureResult result = featureEvaluationService.evaluate(environment, userId);
+        ServiceBFeatureResult result =
+                featureEvaluationService.evaluate(environment, namespace, userId);
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("service", "service-b");
         payload.put("environment", result.getEnvironment());
+        payload.put("namespace", result.getNamespace());
         payload.put("newUiEnabled", result.isNewUiEnabled());
         payload.put("dataflowBatchSize", result.getDataflowBatchSize());
         payload.put("welcomeBanner", result.getWelcomeBanner());

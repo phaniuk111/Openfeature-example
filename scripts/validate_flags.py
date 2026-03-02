@@ -79,6 +79,10 @@ def compare_json_equivalence(path_a: Path, path_b: Path, errors: List[str]) -> N
         )
 
 
+def canonical_value(value) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"))
+
+
 def main() -> int:
     repo_root = Path(__file__).resolve().parents[1]
     errors: List[str] = []
@@ -87,6 +91,7 @@ def main() -> int:
         service_dir = repo_root / service
         flag_dir = service_dir / "flags"
         env_payloads: Dict[str, dict] = {}
+        baseline_keys: Set[str] = set()
 
         for env in ENVS:
             path = flag_dir / f"flags-{env}.json"
@@ -120,6 +125,35 @@ def main() -> int:
             targeting_payload = load_json(targeting_path, errors)
             if targeting_payload is not None:
                 validate_flag_file(targeting_path, targeting_payload, errors)
+                if baseline_keys:
+                    targeting_flags = targeting_payload.get("flags", {})
+                    if isinstance(targeting_flags, dict):
+                        targeting_keys = set(targeting_flags.keys())
+                        if targeting_keys != baseline_keys:
+                            errors.append(
+                                f"{service}: targeting flag keys differ from env files: "
+                                f"{sorted(baseline_keys.symmetric_difference(targeting_keys))}"
+                            )
+                        else:
+                            for flag_key in sorted(baseline_keys):
+                                target_flag_def = targeting_flags.get(flag_key, {})
+                                target_variants = target_flag_def.get("variants", {})
+                                if not isinstance(target_variants, dict):
+                                    continue
+                                target_variant_values = {
+                                    canonical_value(value)
+                                    for value in target_variants.values()
+                                }
+                                for env in ENVS:
+                                    env_flag_def = env_payloads[env]["flags"][flag_key]
+                                    env_default_variant = env_flag_def["defaultVariant"]
+                                    env_default_value = env_flag_def["variants"][env_default_variant]
+                                    if canonical_value(env_default_value) not in target_variant_values:
+                                        errors.append(
+                                            f"{service}: targeting flag '{flag_key}' "
+                                            f"does not include {env} default value "
+                                            f"{env_default_value!r} in variants"
+                                        )
 
         helm_flag_dir = repo_root / "helm" / service / "flags"
         for env in ENVS:

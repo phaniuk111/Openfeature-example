@@ -3,6 +3,7 @@ package com.example.servicea.model;
 public class ServiceAFeatureResult {
 
     private final String environment;
+    private final String namespace;
     private final boolean newUiEnabled;
     private final Integer dataflowBatchSize;
     private final String welcomeBanner;
@@ -10,11 +11,13 @@ public class ServiceAFeatureResult {
 
     public ServiceAFeatureResult(
             String environment,
+            String namespace,
             boolean newUiEnabled,
             Integer dataflowBatchSize,
             String welcomeBanner,
             boolean checkoutV2) {
         this.environment = environment;
+        this.namespace = namespace;
         this.newUiEnabled = newUiEnabled;
         this.dataflowBatchSize = dataflowBatchSize;
         this.welcomeBanner = welcomeBanner;
@@ -23,6 +26,10 @@ public class ServiceAFeatureResult {
 
     public String getEnvironment() {
         return environment;
+    }
+
+    public String getNamespace() {
+        return namespace;
     }
 
     public boolean isNewUiEnabled() {

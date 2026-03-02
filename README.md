@@ -46,11 +46,12 @@ Endpoints:
 - `http://localhost:8081/api/flags` (service-a)
 - `http://localhost:8082/api/flags` (service-b)
 
-Query with environment override:
+Query with environment / namespace override:
 
 ```bash
-curl "http://localhost:8081/api/flags?environment=staging"
-curl "http://localhost:8082/api/flags?environment=prod"
+curl "http://localhost:8081/api/flags?environment=staging&namespace=staging"
+curl "http://localhost:8081/api/flags?environment=dev&namespace=dev2"
+curl "http://localhost:8082/api/flags?environment=prod&namespace=prod"
 ```
 
 ## Per-Service Flag Ownership
@@ -86,6 +87,11 @@ Targeting mode example:
 ```bash
 FLAG_MODE=targeting APP_ENV=prod gradle :service-a:bootRun
 ```
+
+Namespace behavior in targeting files:
+- `dev`, `dev1`, and `dev2` namespaces resolve to dev behavior
+- other namespaces fall back to `environment` (`dev`, `staging`, `prod`)
+- targeting variants are aligned to `flags-dev/staging/prod.json` values
 
 ## Integration Test
 

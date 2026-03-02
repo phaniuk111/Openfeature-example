@@ -50,6 +50,7 @@ class FeatureApiIntegrationTest {
     @DynamicPropertySource
     static void testProperties(DynamicPropertyRegistry registry) {
         registry.add("app.env", () -> "dev");
+        registry.add("app.namespace", () -> "dev");
         registry.add("app.flags.mode", () -> "per-env");
         registry.add("app.flags.base-path", () -> TEMP_DIR.toString());
         registry.add("app.flags.explicit-file", () -> FLAG_FILE.toString());
@@ -63,6 +64,7 @@ class FeatureApiIntegrationTest {
 
         assertThat(payload.get("service")).isEqualTo("service-b");
         assertThat(payload.get("environment")).isEqualTo("dev");
+        assertThat(payload.get("namespace")).isEqualTo("dev");
         assertThat(payload.get("newUiEnabled")).isEqualTo(false);
         assertThat(((Number) payload.get("dataflowBatchSize")).intValue()).isEqualTo(40);
         assertThat(payload.get("welcomeBanner")).isEqualTo("Service B - dev");
