@@ -1,0 +1,6 @@
+apiVersion: v2
+name: service-a
+description: Helm chart for service-a in the monorepo
+type: application
+version: 0.1.0
+appVersion: "0.0.1"

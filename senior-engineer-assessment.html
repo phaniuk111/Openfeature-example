@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Senior Engineer Assessment — OpenFeature Flag Framework</title>
+<style>
+  :root { --green: #22c55e; --yellow: #eab308; --red: #ef4444; --blue: #3b82f6; --gray: #6b7280; --bg: #0f172a; --card: #1e293b; --border: #334155; --text: #e2e8f0; --muted: #94a3b8; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 2rem; max-width: 1200px; margin: auto; }
+  h1 { font-size: 1.8rem; margin-bottom: 0.25rem; }
+  h2 { font-size: 1.35rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.1rem; margin: 1.25rem 0 0.5rem; color: var(--blue); }
+  .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 2rem; }
+  .verdict-box { background: linear-gradient(135deg, #064e3b 0%, #1e293b 100%); border: 1px solid #10b981; border-radius: 12px; padding: 1.5rem 2rem; margin: 1.5rem 0 2.5rem; }
+  .verdict-box h2 { border: none; margin: 0 0 0.75rem; color: var(--green); font-size: 1.4rem; }
+  .verdict-box p { margin: 0; font-size: 1.05rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; margin: 0.75rem 0; }
+  .score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+  .score-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; text-align: center; }
+  .score-card .label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .score-card .score { font-size: 2rem; font-weight: 700; margin: 0.25rem 0; }
+  .score-card .score.green { color: var(--green); }
+  .score-card .score.yellow { color: var(--yellow); }
+  .score-card .score.red { color: var(--red); }
+  .score-card .detail { font-size: 0.8rem; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+  th, td { padding: 0.6rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+  tr:hover { background: rgba(59,130,246,0.05); }
+  .tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .tag-green { background: rgba(34,197,94,0.15); color: var(--green); }
+  .tag-yellow { background: rgba(234,179,8,0.15); color: var(--yellow); }
+  .tag-red { background: rgba(239,68,68,0.15); color: var(--red); }
+  .tag-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+  .pro-con { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  .pro-con .col { background: var(--card); border-radius: 10px; padding: 1rem 1.25rem; }
+  .pro-con .col h3 { margin-top: 0; }
+  .pro-con ul { padding-left: 1.25rem; }
+  .pro-con li { margin: 0.4rem 0; font-size: 0.9rem; }
+  .risk-item { display: flex; align-items: flex-start; gap: 0.75rem; margin: 0.75rem 0; }
+  .risk-sev { flex-shrink: 0; width: 60px; text-align: center; }
+  .risk-body { flex: 1; }
+  .risk-body strong { display: block; margin-bottom: 0.15rem; }
+  .risk-body p { font-size: 0.85rem; color: var(--muted); margin: 0; }
+  .file-tree { font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.82rem; background: var(--card); padding: 1rem 1.25rem; border-radius: 8px; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--muted); }
+  .file-tree span { color: var(--blue); }
+  .compare-table td:first-child { font-weight: 600; white-space: nowrap; }
+  code { background: rgba(59,130,246,0.1); padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.85em; }
+  .section-num { color: var(--blue); margin-right: 0.35rem; }
+  .recommendation { background: var(--card); border-left: 3px solid var(--blue); padding: 1rem 1.25rem; margin: 0.75rem 0; border-radius: 0 8px 8px 0; }
+  .recommendation strong { color: var(--blue); }
+  @media (max-width: 768px) { .pro-con { grid-template-columns: 1fr; } .score-grid { grid-template-columns: 1fr 1fr; } body { padding: 1rem; } }
+</style>
+</head>
+<body>
+
+<h1>Senior Engineer Assessment</h1>
+<p class="subtitle">OpenFeature + flagd FILE Mode — Feature Flag Framework Proposal &nbsp;|&nbsp; Reviewed March 2026</p>
+
+<!-- ===== VERDICT ===== -->
+<div class="verdict-box">
+  <h2>Verdict: APPROVE with conditions</h2>
+  <p>This framework is <strong>ready to propose to the team</strong>. The architecture is sound, follows CNCF-backed standards (OpenFeature is a graduated project), avoids vendor lock-in, and covers both Spring Boot microservices and Dataflow batch pipelines. There are a handful of gaps that should be closed before production rollout — none are blockers, all are addressable in a single sprint. See Section 7 for the pre-production checklist.</p>
+</div>
+
+<!-- ===== SCOREBOARD ===== -->
+<div class="score-grid">
+  <div class="score-card"><div class="label">Architecture</div><div class="score green">9/10</div><div class="detail">Clean separation, vendor-neutral</div></div>
+  <div class="score-card"><div class="label">Code Quality</div><div class="score green">8/10</div><div class="detail">Immutable models, proper DI</div></div>
+  <div class="score-card"><div class="label">Test Coverage</div><div class="score yellow">6/10</div><div class="detail">Service-A solid; B + Dataflow missing</div></div>
+  <div class="score-card"><div class="label">Production Readiness</div><div class="score yellow">7/10</div><div class="detail">Good bones, needs observability</div></div>
+  <div class="score-card"><div class="label">DevEx / Onboarding</div><div class="score green">8/10</div><div class="detail">Simple mental model, few moving parts</div></div>
+  <div class="score-card"><div class="label">Scalability</div><div class="score green">8/10</div><div class="detail">Per-service flags, monorepo proven</div></div>
+</div>
+
+<!-- ===== 1. WHAT THE FRAMEWORK DOES ===== -->
+<h2><span class="section-num">1</span> What the framework does</h2>
+<div class="card">
+  <p>A <strong>zero-infrastructure feature flag system</strong> using OpenFeature SDK + flagd provider in FILE mode. Flags live as JSON files in the repo, are mounted via Kubernetes ConfigMaps, and are evaluated in-process — no flag server, no network calls, no third-party SaaS.</p>
+  <p style="margin-top:0.75rem;">It supports three evaluation modes: <strong>per-environment</strong> (static file per env), <strong>API/dynamic</strong> (context passed at runtime), and <strong>targeting</strong> (JsonLogic rules evaluated against user/env context).</p>
+</div>
+
+<!-- ===== 2. ARCHITECTURE ASSESSMENT ===== -->
+<h2><span class="section-num">2</span> Architecture assessment</h2>
+
+<h3>Repository structure</h3>
+<div class="file-tree">openfeature-monorepo-example/
+├── <span>shared/openfeature-config/</span>      ← Provider wiring + Client bean (shared library)
+│   └── OpenFeatureConfig.java
+├── <span>service-a/</span>                       ← Spring Boot service on :8081
+│   ├── model/ServiceAFeatureResult.java
+│   ├── service/ServiceAFeatureEvaluationService.java
+│   ├── web/FeatureController.java
+│   ├── flags/  (dev, staging, prod JSON)
+│   └── FeatureApiIntegrationTest.java
+├── <span>service-b/</span>                       ← Spring Boot service on :8082
+│   ├── model/ServiceBFeatureResult.java
+│   ├── service/ServiceBFeatureEvaluationService.java
+│   ├── web/FeatureController.java
+│   └── flags/  (dev, staging, prod JSON)
+├── <span>maven-dataflow-example/</span>           ← Dataflow Flex Template (Maven)
+│   ├── FlexTemplateOpenFeaturePipeline.java
+│   ├── DataflowFlagEvaluationExample.java
+│   ├── flex-template/ (Dockerfile, metadata.json)
+│   └── flags/  (dev, staging, prod JSON)
+├── <span>helm/</span>
+│   ├── service-a/  (Chart, values, ConfigMap, Deployment, Service)
+│   └── service-b/  (same structure)
+├── settings.gradle.kts
+└── build.gradle.kts</div>
+
+<h3>What's right about this design</h3>
+<div class="pro-con">
+  <div class="col" style="border-left: 3px solid var(--green);">
+    <h3 style="color:var(--green)">Strengths</h3>
+    <ul>
+      <li><strong>Vendor-neutral</strong> — OpenFeature is CNCF-graduated. Swap flagd for LaunchDarkly, Split, or CloudBees by changing one provider bean; zero application code changes.</li>
+      <li><strong>Zero-infra</strong> — FILE mode means no flag server to operate, no network latency, no availability risk. Flags evaluated in-process at microsecond speed.</li>
+      <li><strong>GitOps-friendly</strong> — flag files are in the repo, reviewed via PR, versioned in git. Full audit trail by default.</li>
+      <li><strong>Hot-reload</strong> — flagd's file-watcher picks up ConfigMap changes without pod restart. Proven in integration test.</li>
+      <li><strong>Monorepo-correct</strong> — shared module only provides wiring; each service owns its own model, service, and flag definitions. No shared-model coupling.</li>
+      <li><strong>Multi-path resolution</strong> — <code>FLAG_BASE_PATH</code> / <code>FLAG_BASE_PATHS</code> / explicit file precedence chain works across local dev, CI, and K8s.</li>
+      <li><strong>Dataflow coverage</strong> — DoFn lifecycle handled correctly with transient fields, @Setup/@Teardown, AtomicInteger instance tracking, and gs:// guard.</li>
+    </ul>
+  </div>
+  <div class="col" style="border-left: 3px solid var(--yellow);">
+    <h3 style="color:var(--yellow)">Gaps to address</h3>
+    <ul>
+      <li><strong>No service-b tests</strong> — zero integration or unit tests for service-b. Copy service-a's pattern.</li>
+      <li><strong>No Dataflow tests</strong> — FlexTemplateOpenFeaturePipeline has no test coverage.</li>
+      <li><strong>No flag evaluation logging</strong> — no structured audit trail of which variant was returned for which context. Essential for debugging and compliance.</li>
+      <li><strong>Duplicate flag files</strong> — <code>service-a/flags/</code> and <code>helm/service-a/flags/</code> are identical copies. Single source of truth needed.</li>
+      <li><strong>No flag schema validation in CI</strong> — a typo in a flag name or malformed JSON deploys silently.</li>
+      <li><strong>No targeting mode examples</strong> — <code>flags-targeting.json</code> doesn't exist anywhere in the repo despite code supporting it.</li>
+      <li><strong>Missing Helm _helpers.tpl for service-b</strong> — exists but should be verified identical to service-a's pattern.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== 3. CODE QUALITY DEEP DIVE ===== -->
+<h2><span class="section-num">3</span> Code quality deep dive</h2>
+
+<table>
+  <tr><th>File</th><th>Rating</th><th>Notes</th></tr>
+  <tr>
+    <td><code>OpenFeatureConfig.java</code></td>
+    <td><span class="tag tag-green">SOLID</span></td>
+    <td>Multi-path resolution is well-engineered. <code>destroyMethod="shutdown"</code> correct. Error messages include all attempted paths — excellent debuggability. Minor: could use <code>StringUtils.hasText()</code> from Spring instead of custom helper.</td>
+  </tr>
+  <tr>
+    <td><code>ServiceAFeatureEvaluationService</code></td>
+    <td><span class="tag tag-green">SOLID</span></td>
+    <td>Clean constructor injection, immutable context, all 4 flags evaluated with safe defaults. Minor: no try/catch around individual flag calls — one SDK failure kills the entire evaluation.</td>
+  </tr>
+  <tr>
+    <td><code>ServiceAFeatureResult</code></td>
+    <td><span class="tag tag-green">SOLID</span></td>
+    <td>All-final fields, proper boolean <code>is*</code> getters. Missing: <code>toString()</code> for debugging, and could be a Java record if targeting 16+.</td>
+  </tr>
+  <tr>
+    <td><code>FeatureController (A)</code></td>
+    <td><span class="tag tag-green">SOLID</span></td>
+    <td>Simple delegation to service. <code>LinkedHashMap</code> preserves JSON field order — nice touch. Missing: no <code>@ResponseStatus</code> or error handler for evaluation failures.</td>
+  </tr>
+  <tr>
+    <td><code>FeatureApiIntegrationTest</code></td>
+    <td><span class="tag tag-green">SOLID</span></td>
+    <td>Tests both initial load AND hot-reload with Awaitility polling. <code>@DynamicPropertySource</code> with temp directory is best practice. <code>writeFlags()</code> parameterized with all 4 flags. Minor: <code>FileTime.from(Instant.now().plusMillis(50))</code> is a workaround for inotify; should be documented.</td>
+  </tr>
+  <tr>
+    <td><code>FlexTemplateOpenFeaturePipeline</code></td>
+    <td><span class="tag tag-green">SOLID</span></td>
+    <td>All 5 previously identified bugs fixed. <code>transient</code> fields, <code>@Teardown</code> with AtomicInteger guard, gs:// rejection, <code>waitUntilFinish()</code>, try/catch in setup. Minor: <code>ACTIVE_INSTANCE_COUNT</code> uses AtomicInteger but OpenFeatureAPI is a JVM singleton — in a multi-threaded Beam worker this is safe but worth documenting the assumption.</td>
+  </tr>
+  <tr>
+    <td><code>ServiceBFeatureEvaluationService</code></td>
+    <td><span class="tag tag-green">SOLID</span></td>
+    <td>Mirrors service-a pattern correctly. Has its own flag (<code>recommendations-engine</code>) instead of <code>checkout-v2</code>. Same minor gaps as service-a.</td>
+  </tr>
+  <tr>
+    <td><code>Helm charts (both)</code></td>
+    <td><span class="tag tag-yellow">OK</span></td>
+    <td>Functional but minimal. Missing: readiness/liveness probes, resource limits, pod disruption budget, annotations for ConfigMap hash (to trigger rolling restart on flag change). <code>replicas: 1</code> hardcoded — should use values.</td>
+  </tr>
+  <tr>
+    <td><code>build.gradle.kts (root)</code></td>
+    <td><span class="tag tag-green">SOLID</span></td>
+    <td><code>apply false</code> pattern correct for monorepo. <code>tasks.withType&lt;Test&gt;</code> is cosmetically outside the <code>plugins.withType&lt;JavaPlugin&gt;</code> guard — harmless but cleaner inside. Java 11 toolchain appropriate for Beam 2.57 compatibility.</td>
+  </tr>
+</table>
+
+<!-- ===== 4. RISK REGISTER ===== -->
+<h2><span class="section-num">4</span> Risk register</h2>
+
+<div class="risk-item">
+  <div class="risk-sev"><span class="tag tag-red">HIGH</span></div>
+  <div class="risk-body">
+    <strong>Flag file drift between repo and Helm</strong>
+    <p><code>service-a/flags/</code> and <code>helm/service-a/flags/</code> are separate copies of the same data. If a dev edits one and forgets the other, environments diverge silently. Fix: symlink Helm flags to the service's flags directory, or use a CI check that diffs them.</p>
+  </div>
+</div>
+<div class="risk-item">
+  <div class="risk-sev"><span class="tag tag-red">HIGH</span></div>
+  <div class="risk-body">
+    <strong>No flag schema validation in CI</strong>
+    <p>A typo in a flag key (e.g., <code>"new_ui"</code> instead of <code>"new-ui"</code>) will not break the build. The SDK will silently return the default value. This is feature flags' biggest operational risk. Fix: add a CI step that validates every <code>flags-*.json</code> against the flagd schema and checks that all flag keys referenced in Java code exist in every env file.</p>
+  </div>
+</div>
+<div class="risk-item">
+  <div class="risk-sev"><span class="tag tag-yellow">MEDIUM</span></div>
+  <div class="risk-body">
+    <strong>No evaluation-time observability</strong>
+    <p>When a flag returns an unexpected value in production, there's no log or metric showing what variant was evaluated, with what context, at what time. Fix: add a global OpenFeature hook that logs every evaluation (flag key, variant, context hash, latency).</p>
+  </div>
+</div>
+<div class="risk-item">
+  <div class="risk-sev"><span class="tag tag-yellow">MEDIUM</span></div>
+  <div class="risk-body">
+    <strong>Single-point evaluation failure</strong>
+    <p>If one flag evaluation throws (e.g., type mismatch), the entire <code>evaluate()</code> call fails and the controller returns 500. Fix: wrap each <code>client.get*Value()</code> in its own try/catch, log the failure, and use the default.</p>
+  </div>
+</div>
+<div class="risk-item">
+  <div class="risk-sev"><span class="tag tag-yellow">MEDIUM</span></div>
+  <div class="risk-body">
+    <strong>Helm lacks production hardening</strong>
+    <p>No readiness/liveness probes, no resource requests/limits, no PDB, no ConfigMap hash annotation (so a flag-only change won't trigger a rolling restart of pods). These are standard K8s production requirements.</p>
+  </div>
+</div>
+<div class="risk-item">
+  <div class="risk-sev"><span class="tag tag-blue">LOW</span></div>
+  <div class="risk-body">
+    <strong>No targeting-mode examples</strong>
+    <p>The code supports <code>flags-targeting.json</code> with JsonLogic rules, but no example file exists. Team members won't know how to use this mode. Fix: add at least one reference targeting file with a documented rule.</p>
+  </div>
+</div>
+
+<!-- ===== 5. HOW IT COMPARES ===== -->
+<h2><span class="section-num">5</span> How it compares to alternatives</h2>
+<table class="compare-table">
+  <tr><th>Criterion</th><th>This framework (flagd FILE)</th><th>LaunchDarkly / Split SaaS</th><th>Unleash (self-hosted)</th><th>Spring Cloud Config</th></tr>
+  <tr><td>Vendor lock-in</td><td><span class="tag tag-green">None</span> — CNCF standard</td><td><span class="tag tag-red">High</span></td><td><span class="tag tag-yellow">Moderate</span></td><td><span class="tag tag-yellow">Spring ecosystem</span></td></tr>
+  <tr><td>Infrastructure</td><td><span class="tag tag-green">Zero</span> — in-process</td><td>SaaS managed</td><td>Server + DB required</td><td>Config server required</td></tr>
+  <tr><td>Evaluation latency</td><td><span class="tag tag-green">Microseconds</span></td><td>~10-50ms (cached)</td><td>~10-30ms</td><td>At startup only</td></tr>
+  <tr><td>Real-time targeting</td><td><span class="tag tag-yellow">JsonLogic rules</span></td><td><span class="tag tag-green">Full UI</span></td><td><span class="tag tag-green">Full UI</span></td><td><span class="tag tag-red">None</span></td></tr>
+  <tr><td>GitOps / audit trail</td><td><span class="tag tag-green">Native</span> — flags in repo</td><td>Separate audit log</td><td>Separate audit log</td><td><span class="tag tag-green">Native</span></td></tr>
+  <tr><td>Cost at 10 services</td><td><span class="tag tag-green">$0</span></td><td>$$$ per seat/flag</td><td>$$ (infra)</td><td>$ (infra)</td></tr>
+  <tr><td>Dataflow / Beam support</td><td><span class="tag tag-green">Proven here</span></td><td><span class="tag tag-yellow">Custom work</span></td><td><span class="tag tag-red">No native support</span></td><td><span class="tag tag-red">N/A</span></td></tr>
+  <tr><td>Migration to SaaS later</td><td><span class="tag tag-green">Swap one bean</span></td><td>N/A</td><td>SDK swap</td><td>Full rewrite</td></tr>
+</table>
+
+<!-- ===== 6. TEAM PROPOSAL TALKING POINTS ===== -->
+<h2><span class="section-num">6</span> Team proposal talking points</h2>
+
+<div class="card">
+  <h3 style="color:var(--green); margin-top:0">Why propose this now</h3>
+  <p><strong>1. Standards-based.</strong> OpenFeature is the only CNCF-graduated feature flag standard. Adopting it now means any future provider migration (SaaS or self-hosted) requires changing one Spring bean, not application code.</p>
+  <p style="margin-top:0.5rem;"><strong>2. Zero operational cost.</strong> FILE mode adds no infrastructure, no network dependency, no availability risk. The flag evaluation is literally a hashmap lookup in JVM memory.</p>
+  <p style="margin-top:0.5rem;"><strong>3. GitOps-native.</strong> Flag changes go through the same PR review process as code. No separate flag management UI to learn, no separate access control system to manage.</p>
+  <p style="margin-top:0.5rem;"><strong>4. Proven across both runtimes.</strong> This framework works identically in Spring Boot microservices and Dataflow Flex Template batch pipelines, which means one pattern for the whole team.</p>
+  <p style="margin-top:0.5rem;"><strong>5. Escape hatch built in.</strong> If the team outgrows FILE mode and needs real-time targeting at scale, swapping to flagd gRPC mode or LaunchDarkly is a one-line provider change.</p>
+</div>
+
+<div class="card">
+  <h3 style="color:var(--yellow); margin-top:0">What to be transparent about</h3>
+  <p><strong>1. No UI.</strong> There's no dashboard for PMs to toggle flags. Changes require a PR. For teams that want non-engineering flag control, this is a limitation. Counter-argument: for most teams, PR-based flag changes are actually safer.</p>
+  <p style="margin-top:0.5rem;"><strong>2. Deploy to activate.</strong> In per-env mode, a flag change requires a ConfigMap update (K8s rolling update or manual <code>kubectl apply</code>). It's not instant like a SaaS toggle. Hot-reload mitigates this — the pod picks up ConfigMap changes within seconds — but it's still a deploy, not a button click.</p>
+  <p style="margin-top:0.5rem;"><strong>3. Flag drift risk.</strong> Multiple copies of flag files exist today. This needs a CI guardrail before team adoption.</p>
+</div>
+
+<!-- ===== 7. PRE-PRODUCTION CHECKLIST ===== -->
+<h2><span class="section-num">7</span> Pre-production checklist</h2>
+<p style="color:var(--muted); margin-bottom:1rem;">Ordered by priority. Items marked <span class="tag tag-red">MUST</span> are blockers; <span class="tag tag-yellow">SHOULD</span> are strongly recommended; <span class="tag tag-blue">NICE</span> can be deferred.</p>
+
+<table>
+  <tr><th>#</th><th>Item</th><th>Priority</th><th>Effort</th><th>Detail</th></tr>
+  <tr><td>1</td><td>Eliminate duplicate flag files</td><td><span class="tag tag-red">MUST</span></td><td>~1h</td><td>Symlink <code>helm/service-a/flags/</code> → <code>service-a/flags/</code> (or single-source via Kustomize overlay). One source of truth.</td></tr>
+  <tr><td>2</td><td>CI flag schema validation</td><td><span class="tag tag-red">MUST</span></td><td>~2h</td><td>Script that: (a) validates every <code>flags-*.json</code> against flagd schema; (b) checks all flag keys in Java code exist in every env file; (c) fails the build on mismatch.</td></tr>
+  <tr><td>3</td><td>Add OpenFeature evaluation hook for logging</td><td><span class="tag tag-red">MUST</span></td><td>~2h</td><td>Global hook that logs: flag key, returned variant, context summary, evaluation latency. Essential for production debugging.</td></tr>
+  <tr><td>4</td><td>Service-b integration tests</td><td><span class="tag tag-yellow">SHOULD</span></td><td>~2h</td><td>Copy service-a's <code>FeatureApiIntegrationTest</code> pattern. Include <code>recommendations-engine</code> flag.</td></tr>
+  <tr><td>5</td><td>Wrap individual flag evals in try/catch</td><td><span class="tag tag-yellow">SHOULD</span></td><td>~1h</td><td>In both evaluation services, catch per-flag exceptions so one broken flag doesn't crash the endpoint.</td></tr>
+  <tr><td>6</td><td>Helm production hardening</td><td><span class="tag tag-yellow">SHOULD</span></td><td>~3h</td><td>Add: readiness/liveness probes, resource requests/limits, PDB, ConfigMap hash annotation (<code>checksum/flags</code>), replicas from values.</td></tr>
+  <tr><td>7</td><td>Add a <code>flags-targeting.json</code> example</td><td><span class="tag tag-yellow">SHOULD</span></td><td>~1h</td><td>Demonstrates JsonLogic rules. Without it, the targeting mode is undiscoverable.</td></tr>
+  <tr><td>8</td><td>Metrics (Micrometer) for flag evaluations</td><td><span class="tag tag-blue">NICE</span></td><td>~2h</td><td>Counter per flag key + variant. Enables Grafana dashboards showing flag distribution in real-time.</td></tr>
+  <tr><td>9</td><td>Dataflow pipeline unit test</td><td><span class="tag tag-blue">NICE</span></td><td>~3h</td><td>Use <code>TestPipeline</code> with a temp flag file to validate the EvaluateFlagsFn DoFn end-to-end.</td></tr>
+  <tr><td>10</td><td><code>toString()</code> on FeatureResult models</td><td><span class="tag tag-blue">NICE</span></td><td>~15m</td><td>Helps with log debugging. Consider Java records if Java 16+ is feasible.</td></tr>
+</table>
+
+<!-- ===== 8. FINAL RECOMMENDATION ===== -->
+<h2><span class="section-num">8</span> Final recommendation</h2>
+<div class="verdict-box">
+  <h2>Propose it. Ship items 1–3 first.</h2>
+  <p>The architecture is clean, the technology choice is sound (CNCF-backed, vendor-neutral, zero-infra), and the codebase demonstrates all the hard problems are solved — monorepo structure, multi-path flag resolution, hot-reload, Dataflow lifecycle management. The remaining gaps are all "polish and harden" work, not architectural concerns. Close items 1–3 (flag dedup, CI validation, eval logging) before merging to main, then tackle items 4–7 in the same sprint. This is a framework the team can adopt confidently.</p>
+</div>
+
+<p style="color:var(--muted); font-size:0.8rem; margin-top:3rem; text-align:center;">Assessment by senior engineering review &nbsp;|&nbsp; March 2026 &nbsp;|&nbsp; Codebase: openfeature-monorepo-example</p>
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+server:
+  port: 8081
+
+app:
+  env: ${APP_ENV:dev}
+  flags:
+    mode: ${FLAG_MODE:per-env}
+    base-path: ${FLAG_BASE_PATH:}
+    base-paths: ${FLAG_BASE_PATHS:flags,service-a/flags,/etc/flags}
+    explicit-file: ${FLAGD_OFFLINE_FLAG_SOURCE_PATH:}
+    deadline-ms: ${FLAGD_DEADLINE_MS:500}

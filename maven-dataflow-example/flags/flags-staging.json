@@ -1,0 +1,31 @@
+{
+  "$schema": "https://flagd.dev/schema/v0/flags.json",
+  "flags": {
+    "new-ui": {
+      "state": "ENABLED",
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "defaultVariant": "on"
+    },
+    "dataflow-batch-size": {
+      "state": "ENABLED",
+      "variants": {
+        "small": 100,
+        "medium": 500,
+        "large": 2000
+      },
+      "defaultVariant": "medium"
+    },
+    "welcome-banner": {
+      "state": "ENABLED",
+      "variants": {
+        "dev": "Hello from dev",
+        "staging": "Hello from staging",
+        "prod": "Hello from production"
+      },
+      "defaultVariant": "staging"
+    }
+  }
+}

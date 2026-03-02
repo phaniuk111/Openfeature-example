@@ -1,0 +1,34 @@
+{
+  "name": "openfeature-file-mode-flex-template",
+  "description": "Dataflow Flex Template example using OpenFeature + flagd FILE mode",
+  "parameters": [
+    {
+      "name": "appEnv",
+      "label": "Application environment",
+      "helpText": "Environment value injected into OpenFeature evaluation context. Example: dev, staging, prod.",
+      "paramType": "TEXT",
+      "isOptional": true
+    },
+    {
+      "name": "flagFilePath",
+      "label": "Worker-local flag JSON path",
+      "helpText": "Absolute local path inside each worker container (not gs://). Example: /opt/flags/flags-prod.json.",
+      "paramType": "TEXT",
+      "isOptional": false
+    },
+    {
+      "name": "input",
+      "label": "Input path",
+      "helpText": "Optional input file path. If omitted, demo records are generated.",
+      "paramType": "TEXT",
+      "isOptional": true
+    },
+    {
+      "name": "output",
+      "label": "Output path",
+      "helpText": "Required output path. Example: gs://bucket/path/output",
+      "paramType": "TEXT",
+      "isOptional": false
+    }
+  ]
+}

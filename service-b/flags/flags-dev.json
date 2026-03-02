@@ -1,0 +1,36 @@
+{
+  "$schema": "https://flagd.dev/schema/v0/flags.json",
+  "flags": {
+    "new-ui": {
+      "state": "ENABLED",
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "defaultVariant": "off"
+    },
+    "dataflow-batch-size": {
+      "state": "ENABLED",
+      "variants": {
+        "small": 40,
+        "large": 120
+      },
+      "defaultVariant": "small"
+    },
+    "welcome-banner": {
+      "state": "ENABLED",
+      "variants": {
+        "value": "Service B - dev"
+      },
+      "defaultVariant": "value"
+    },
+    "recommendations-engine": {
+      "state": "ENABLED",
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "defaultVariant": "off"
+    }
+  }
+}

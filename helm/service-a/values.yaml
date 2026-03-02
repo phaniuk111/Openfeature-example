@@ -1,0 +1,10 @@
+app:
+  env: dev
+
+image:
+  repository: ghcr.io/example/service-a
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  port: 8081

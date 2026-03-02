@@ -1,0 +1,105 @@
+{
+  "$schema": "https://flagd.dev/schema/v0/flags.json",
+  "flags": {
+    "new-ui": {
+      "state": "ENABLED",
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "defaultVariant": "off",
+      "targeting": {
+        "if": [
+          {
+            "==": [
+              {
+                "var": "environment"
+              },
+              "dev"
+            ]
+          },
+          "on",
+          "off"
+        ]
+      }
+    },
+    "dataflow-batch-size": {
+      "state": "ENABLED",
+      "variants": {
+        "small": 40,
+        "large": 120
+      },
+      "defaultVariant": "small",
+      "targeting": {
+        "if": [
+          {
+            "==": [
+              {
+                "var": "environment"
+              },
+              "prod"
+            ]
+          },
+          "large",
+          "small"
+        ]
+      }
+    },
+    "welcome-banner": {
+      "state": "ENABLED",
+      "variants": {
+        "dev": "Service B - targeting dev",
+        "prod": "Service B - targeting prod"
+      },
+      "defaultVariant": "dev",
+      "targeting": {
+        "if": [
+          {
+            "==": [
+              {
+                "var": "environment"
+              },
+              "prod"
+            ]
+          },
+          "prod",
+          "dev"
+        ]
+      }
+    },
+    "recommendations-engine": {
+      "state": "ENABLED",
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "defaultVariant": "off",
+      "targeting": {
+        "if": [
+          {
+            "or": [
+              {
+                "==": [
+                  {
+                    "var": "environment"
+                  },
+                  "staging"
+                ]
+              },
+              {
+                "==": [
+                  {
+                    "var": "environment"
+                  },
+                  "prod"
+                ]
+              }
+            ]
+          },
+          "on",
+          "off"
+        ]
+      }
+    }
+  }
+}

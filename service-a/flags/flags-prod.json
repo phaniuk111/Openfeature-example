@@ -1,0 +1,36 @@
+{
+  "$schema": "https://flagd.dev/schema/v0/flags.json",
+  "flags": {
+    "new-ui": {
+      "state": "ENABLED",
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "defaultVariant": "off"
+    },
+    "dataflow-batch-size": {
+      "state": "ENABLED",
+      "variants": {
+        "small": 150,
+        "large": 900
+      },
+      "defaultVariant": "large"
+    },
+    "welcome-banner": {
+      "state": "ENABLED",
+      "variants": {
+        "value": "Service A - production"
+      },
+      "defaultVariant": "value"
+    },
+    "checkout-v2": {
+      "state": "ENABLED",
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "defaultVariant": "on"
+    }
+  }
+}
