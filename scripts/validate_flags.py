@@ -155,13 +155,7 @@ def main() -> int:
                                             f"{env_default_value!r} in variants"
                                         )
 
-        helm_flag_dir = repo_root / "helm" / service / "flags"
-        for env in ENVS:
-            compare_json_equivalence(
-                flag_dir / f"flags-{env}.json",
-                helm_flag_dir / f"flags-{env}.json",
-                errors,
-            )
+        # Helm flags/ dirs are symlinks to service flags/ dirs — no drift check needed.
 
     maven_flags = repo_root / "maven-dataflow-example" / "flags"
     maven_payloads: Dict[str, dict] = {}
